@@ -6,19 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+This section tracks changes that have been implemented but are not yet part of an official release.
+
 ### Added
 
 - Professional enterprise README structure.
 - Platform vision, goals, capabilities, and current progress summary.
 - Enterprise platform architecture diagram.
 - Project engineering principles and author profile.
+- Architecture Decision Records covering modular architecture, APIs, data architecture, clean architecture, provider independence, and analytical storage.
+
+- Enterprise configuration management using Pydantic Settings.
+- Environment variable support through `.env`.
+- Shared application constants module.
+- Centralized enterprise logging framework.
+- FastAPI application bootstrap.
+- Root (`/`), Health (`/health`), and Version (`/version`) API endpoints.
 
 ### Changed
 
 - Updated the current project phase from architecture design toward Sprint 1 platform foundation.
 - Improved repository documentation for technical, business, and portfolio audiences.
 
-## [0.1.0] - 2026-07-12
+## [v0.1.0] - 2026-07-12
 
 ### Added
 

@@ -1,6 +1,7 @@
 import logging
 
 from supplymind.core.config import settings
+from supplymind.core.constants import DEFAULT_LOG_FORMAT
 
 _logging_configured = False
 
@@ -16,7 +17,7 @@ def configure_logging() -> None:
 
     logging.basicConfig(
         level=settings.log_level,
-        format="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
+        format=DEFAULT_LOG_FORMAT,
     )
 
     _logging_configured = True
