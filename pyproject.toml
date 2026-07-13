@@ -17,7 +17,9 @@ keywords = [
     "optimization",
     "mlops"
 ]
-dependencies = []
+dependencies = [
+    "pydantic-settings>=2.14.2",
+]
 
 [build-system]
 requires = ["hatchling"]
