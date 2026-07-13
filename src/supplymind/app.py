@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from supplymind import __version__
+from supplymind.api.router import api_router
 from supplymind.core.config import settings
 from supplymind.core.logger import configure_logging
 
@@ -12,23 +13,14 @@ app = FastAPI(
     description="Enterprise AI platform for supply chain intelligence.",
 )
 
+app.include_router(api_router)
 
-@app.get("/")
-def root() -> dict:
+
+@app.get("/", tags=["Application"])
+def root() -> dict[str, str]:
+    """Return basic application information."""
     return {
         "application": settings.app_name,
         "version": __version__,
         "status": "running",
-    }
-
-@app.get("/health")
-def health() -> dict:
-    return {
-        "status": "healthy",
-    }
-
-@app.get("/version")
-def version() -> dict:
-    return {
-        "version": __version__,
     }
