@@ -318,7 +318,7 @@ The approved quality toolchain will then be installed and configured through `py
 
 ## License
 
-MIT License (coming in Sprint 1)
+MIT License
 
 ## Author
 
