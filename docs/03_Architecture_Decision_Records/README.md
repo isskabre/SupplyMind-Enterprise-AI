@@ -32,11 +32,13 @@ Each ADR follows a consistent format:
 
 ## Current ADRs
 
-| ADR | Decision |
-|------|----------|
-| ADR-001 | Use a Modular Monolith Architecture |
-| ADR-002 | FastAPI as the API Framework *(Planned)* |
-| ADR-003 | Bronze / Silver / Gold Data Architecture *(Planned)* |
-| ADR-004 | Parquet as the Primary Storage Format *(Planned)* |
-| ADR-005 | PyTorch as the Deep Learning Framework *(Planned)* |
-| ADR-006 | Streamlit as the Initial User Interface *(Planned)* |
+| ADR | Decision | Status |
+|---|---|---|
+| ADR-001 | Use a Modular Monolith Architecture | Accepted |
+| ADR-002 | Adopt FastAPI as the Enterprise API Framework | Accepted |
+| ADR-003 | Adopt a Bronze / Silver / Gold Data Architecture | Accepted |
+| ADR-004 | Adopt Clean Architecture | Accepted |
+| ADR-005 | Adopt a Provider-Agnostic AI Architecture | Accepted |
+| ADR-006 | Adopt Parquet as the Primary Analytical Storage Format | Accepted |
+| ADR-007 | Adopt PyTorch as the Deep Learning Framework | Planned |
+| ADR-008 | Adopt Streamlit as the Initial User Interface | Planned |
