@@ -16,7 +16,11 @@ from supplymind.core.errors.handlers import (
     unexpected_exception_handler,
 )
 from supplymind.core.logger import configure_logging
+from supplymind.middleware.correlation_id import CorrelationIdMiddleware
 
+from supplymind.middleware.request_logging import (
+    RequestLoggingMiddleware,
+)
 
 configure_logging()
 
@@ -34,6 +38,9 @@ app = FastAPI(
     description="Enterprise AI platform for supply chain intelligence.",
     lifespan=lifespan,
 )
+
+app.add_middleware(RequestLoggingMiddleware)
+app.add_middleware(CorrelationIdMiddleware)
 
 app.add_exception_handler(
     SupplyMindException,

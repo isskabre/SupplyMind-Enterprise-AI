@@ -1,30 +1,24 @@
-import logging
+"""
+SupplyMind Enterprise AI
 
-from supplymind.core.config import settings
-from supplymind.core.constants import DEFAULT_LOG_FORMAT
+Enterprise Logger Compatibility Layer
 
-_logging_configured = False
+This module exists for backward compatibility.
 
+The actual logging implementation resides in:
 
-def configure_logging() -> None:
-    """
-    Configure the application's logging system.
-    """
-    global _logging_configured
+    supplymind.core.logging.config
 
-    if _logging_configured:
-        return
+Future implementations should import directly from
+`supplymind.core.logging`.
+"""
 
-    logging.basicConfig(
-        level=settings.log_level,
-        format=DEFAULT_LOG_FORMAT,
-    )
+from supplymind.core.logging.config import (
+    configure_logging,
+    get_logger,
+)
 
-    _logging_configured = True
-
-
-def get_logger(name: str) -> logging.Logger:
-    """
-    Return a named logger.
-    """
-    return logging.getLogger(name)
+__all__ = [
+    "configure_logging",
+    "get_logger",
+]
