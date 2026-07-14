@@ -104,6 +104,21 @@ class DatabaseException(SupplyMindException):
         )
 
 
+class ConfigurationException(SupplyMindException):
+    """Raised when application configuration is invalid."""
+
+    def __init__(
+        self,
+        message: str = "Application configuration is invalid.",
+        details: Any | None = None,
+    ) -> None:
+        super().__init__(
+            code=ErrorCode.CONFIGURATION_ERROR,
+            message=message,
+            details=details,
+        )
+
+
 class ConnectorException(SupplyMindException):
     """Raised when an external connector fails."""
 
