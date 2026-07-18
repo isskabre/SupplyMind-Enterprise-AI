@@ -86,3 +86,32 @@ def test_valid_production_configuration_passes() -> None:
     validate_configuration(settings)
 
     assert settings.is_production is True
+
+def test_build_metadata_defaults_to_none() -> None:
+    """Optional build metadata should not be invented locally."""
+
+    test_settings = Settings(
+        _env_file=None,
+    )
+
+    assert test_settings.build_number is None
+    assert test_settings.git_commit is None
+    assert test_settings.build_timestamp is None
+    assert test_settings.deployment_name is None
+
+
+def test_build_metadata_can_be_configured() -> None:
+    """Build metadata should accept values supplied by a pipeline."""
+
+    test_settings = Settings(
+        build_number="142",
+        git_commit="fd6e680",
+        build_timestamp="2026-07-18T09:30:00Z",
+        deployment_name="supplymind-development",
+        _env_file=None,
+    )
+
+    assert test_settings.build_number == "142"
+    assert test_settings.git_commit == "fd6e680"
+    assert test_settings.build_timestamp == "2026-07-18T09:30:00Z"
+    assert test_settings.deployment_name == "supplymind-development"

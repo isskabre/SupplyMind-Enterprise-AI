@@ -58,5 +58,10 @@ class SystemInfoData(BaseModel):
     application: str
     version: str
     environment: str
-    uptime_seconds: float
+    build_number: str | None
+    git_commit: str | None
+    build_timestamp: str | None
+    deployment_name: str | None
+    instance_id: str
     python_version: str
+    uptime_seconds: float

@@ -20,6 +20,11 @@ class Settings(BaseSettings):
     app_name: str = "SupplyMind Enterprise AI"
     app_version: str = __version__
 
+    build_number: str | None = None
+    git_commit: str | None = None
+    build_timestamp: str | None = None
+    deployment_name: str | None = None
+
     environment: Environment = Environment.DEVELOPMENT
 
     debug: bool = True

@@ -29,6 +29,12 @@ def test_system_info_contains_operational_metadata() -> None:
     assert system_info["application"] == "SupplyMind Enterprise AI"
     assert system_info["version"] == "0.1.0"
     assert system_info["environment"] == "development"
+    assert system_info["build_number"] is None
+    assert system_info["git_commit"] is None
+    assert system_info["build_timestamp"] is None
+    assert system_info["deployment_name"] is None
+    assert isinstance(system_info["instance_id"], str)
+    assert system_info["instance_id"]
     assert system_info["uptime_seconds"] >= 0
     assert isinstance(system_info["python_version"], str)
     assert system_info["python_version"]

@@ -6,11 +6,7 @@ System Service
 Contains business logic related to system endpoints.
 """
 
-import platform
-
-from supplymind import __version__
-from supplymind.core.config import settings
-from supplymind.core.runtime import get_uptime_seconds
+from supplymind.core.metadata import build_application_metadata
 
 
 class SystemService:
@@ -18,9 +14,11 @@ class SystemService:
 
     def get_root(self) -> dict[str, str]:
         """Return root application information."""
+        metadata = build_application_metadata()
+
         return {
-            "application": settings.app_name,
-            "version": __version__,
+            "application": metadata.application,
+            "version": metadata.version,
             "status": "running",
         }
 
@@ -36,8 +34,10 @@ class SystemService:
 
     def get_version(self) -> dict[str, str]:
         """Return application version."""
+        metadata = build_application_metadata()
+
         return {
-            "version": __version__,
+            "version": metadata.version,
         }
 
     def get_liveness(self) -> dict[str, bool]:
@@ -60,14 +60,8 @@ class SystemService:
             "ready": True,
         }
 
-    def get_system_info(self) -> dict[str, str | float]:
+    def get_system_info(self) -> dict[str, str | float | None]:
         """
         Return operational metadata for the running application.
         """
-        return {
-            "application": settings.app_name,
-            "version": __version__,
-            "environment": settings.environment.value,
-            "uptime_seconds": get_uptime_seconds(),
-            "python_version": platform.python_version(),
-        }
+        return build_application_metadata().to_dict()

@@ -95,6 +95,12 @@ def test_system_info_endpoint(client: TestClient) -> None:
     assert data["uptime_seconds"] >= 0
     assert isinstance(data["python_version"], str)
     assert data["python_version"]
+    assert data["build_number"] is None
+    assert data["git_commit"] is None
+    assert data["build_timestamp"] is None
+    assert data["deployment_name"] is None
+    assert isinstance(data["instance_id"], str)
+    assert data["instance_id"]
 
 def test_version_endpoint(client: TestClient) -> None:
     """Version endpoint should return the current application version."""
