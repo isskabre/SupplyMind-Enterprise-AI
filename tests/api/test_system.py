@@ -46,6 +46,56 @@ def test_health_endpoint(client: TestClient) -> None:
     assert body["data"] == {"status": "healthy"}
 
 
+def test_liveness_endpoint(client: TestClient) -> None:
+    """Liveness endpoint should report that the process is alive."""
+
+    response = client.get("/api/v1/live")
+
+    assert response.status_code == 200
+
+    body = response.json()
+
+    assert body["success"] is True
+    assert body["message"] == "Liveness check successful."
+    assert body["data"] == {
+        "alive": True,
+    }
+
+def test_readiness_endpoint(client: TestClient) -> None:
+    """Readiness endpoint should report that traffic can be accepted."""
+
+    response = client.get("/api/v1/ready")
+
+    assert response.status_code == 200
+
+    body = response.json()
+
+    assert body["success"] is True
+    assert body["message"] == "Readiness check successful."
+    assert body["data"] == {
+        "ready": True,
+    }
+
+
+def test_system_info_endpoint(client: TestClient) -> None:
+    """System information endpoint should expose runtime metadata."""
+
+    response = client.get("/api/v1/info")
+
+    assert response.status_code == 200
+
+    body = response.json()
+    data = body["data"]
+
+    assert body["success"] is True
+    assert body["message"] == "System information retrieved successfully."
+    assert data["application"] == "SupplyMind Enterprise AI"
+    assert data["version"] == "0.1.0"
+    assert data["environment"] == "development"
+    assert data["uptime_seconds"] >= 0
+    assert isinstance(data["python_version"], str)
+    assert data["python_version"]
+
 def test_version_endpoint(client: TestClient) -> None:
     """Version endpoint should return the current application version."""
 
