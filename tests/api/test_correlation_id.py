@@ -46,3 +46,29 @@ def test_incoming_correlation_id_is_preserved() -> None:
         response.headers["X-Correlation-ID"]
         == expected_correlation_id
     )
+
+def test_invalid_correlation_id_is_replaced(client) -> None:
+    response = client.get(
+        "/api/v1/system/health",
+        headers={
+            "X-Correlation-ID": "unsafe correlation id",
+        },
+    )
+
+    returned_id = response.headers["X-Correlation-ID"]
+
+    assert returned_id != "unsafe correlation id"
+    assert returned_id
+
+
+def test_valid_correlation_id_is_preserved(client) -> None:
+    correlation_id = "external-gateway-request-123"
+
+    response = client.get(
+        "/api/v1/system/health",
+        headers={
+            "X-Correlation-ID": correlation_id,
+        },
+    )
+
+    assert response.headers["X-Correlation-ID"] == correlation_id

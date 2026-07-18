@@ -9,12 +9,14 @@ Centralized logging configuration for the application.
 import logging
 
 from supplymind.core.config import settings
-from supplymind.core.constants import DEFAULT_LOG_FORMAT
+from supplymind.core.logging.constants import (
+    DEFAULT_DATE_FORMAT,
+    DEFAULT_LOG_FORMAT,
+    DEFAULT_LOGGER_NAME,
+)
 from supplymind.core.logging.filters import CorrelationIdFilter
 from supplymind.core.logging.formatters import EnterpriseFormatter
 
-
-LOGGER_NAMESPACE = "supplymind"
 
 _logging_configured = False
 
@@ -34,13 +36,16 @@ def configure_logging() -> None:
     if _logging_configured:
         return
 
-    formatter = EnterpriseFormatter(DEFAULT_LOG_FORMAT)
+    formatter = EnterpriseFormatter(
+        fmt=DEFAULT_LOG_FORMAT,
+        datefmt=DEFAULT_DATE_FORMAT,
+    )
 
     handler = logging.StreamHandler()
     handler.addFilter(CorrelationIdFilter())
     handler.setFormatter(formatter)
 
-    supplymind_logger = logging.getLogger(LOGGER_NAMESPACE)
+    supplymind_logger = logging.getLogger(DEFAULT_LOGGER_NAME)
 
     supplymind_logger.setLevel(settings.log_level)
     supplymind_logger.handlers.clear()
