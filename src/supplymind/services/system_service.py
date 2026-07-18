@@ -6,15 +6,36 @@ System Service
 Contains business logic related to system endpoints.
 """
 
-from supplymind.core.metadata import build_application_metadata
+from collections.abc import Callable
+
+from supplymind.core.metadata import (
+    ApplicationMetadata,
+    build_application_metadata,
+)
+
+
+MetadataProvider = Callable[[], ApplicationMetadata]
 
 
 class SystemService:
     """Business logic for system-related operations."""
 
+    def __init__(
+        self,
+        metadata_provider: MetadataProvider = build_application_metadata,
+    ) -> None:
+        """
+        Initialize the system service.
+
+        Args:
+            metadata_provider:
+                Callable that returns current application metadata.
+        """
+        self._metadata_provider = metadata_provider
+
     def get_root(self) -> dict[str, str]:
         """Return root application information."""
-        metadata = build_application_metadata()
+        metadata = self._metadata_provider()
 
         return {
             "application": metadata.application,
@@ -34,7 +55,7 @@ class SystemService:
 
     def get_version(self) -> dict[str, str]:
         """Return application version."""
-        metadata = build_application_metadata()
+        metadata = self._metadata_provider()
 
         return {
             "version": metadata.version,
@@ -64,4 +85,4 @@ class SystemService:
         """
         Return operational metadata for the running application.
         """
-        return build_application_metadata().to_dict()
+        return self._metadata_provider().to_dict()

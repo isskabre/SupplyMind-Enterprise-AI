@@ -1,6 +1,13 @@
 """Tests for system API endpoints."""
 
+from collections.abc import Callable
+
 from fastapi.testclient import TestClient
+
+from supplymind.app import app
+from supplymind.core.dependencies import get_system_service
+from supplymind.core.metadata import ApplicationMetadata
+from supplymind.services.system_service import SystemService
 
 
 def test_application_root_endpoint(client: TestClient) -> None:
@@ -61,6 +68,7 @@ def test_liveness_endpoint(client: TestClient) -> None:
         "alive": True,
     }
 
+
 def test_readiness_endpoint(client: TestClient) -> None:
     """Readiness endpoint should report that traffic can be accepted."""
 
@@ -102,6 +110,7 @@ def test_system_info_endpoint(client: TestClient) -> None:
     assert isinstance(data["instance_id"], str)
     assert data["instance_id"]
 
+
 def test_version_endpoint(client: TestClient) -> None:
     """Version endpoint should return the current application version."""
 
@@ -132,3 +141,86 @@ def test_unknown_endpoint_returns_enterprise_error(
     assert body["error"]["message"] == "Not Found"
     assert body["error"]["details"] is None
     assert body["meta"] is None
+
+
+def test_system_service_dependency_can_be_overridden(
+    client: TestClient,
+) -> None:
+    """System endpoints should support FastAPI dependency overrides."""
+
+    metadata = ApplicationMetadata(
+        application="SupplyMind Override",
+        version="8.8.8",
+        environment="test",
+        build_number="9001",
+        git_commit="override123",
+        build_timestamp="2026-07-18T15:00:00Z",
+        deployment_name="override-deployment",
+        instance_id="override-instance",
+        python_version="3.12.12",
+        uptime_seconds=123.45,
+    )
+
+    def override_system_service() -> SystemService:
+        return SystemService(
+            metadata_provider=lambda: metadata,
+        )
+
+    app.dependency_overrides[get_system_service] = (
+        override_system_service
+    )
+
+    try:
+        response = client.get("/api/v1/info")
+    finally:
+        app.dependency_overrides.pop(
+            get_system_service,
+            None,
+        )
+
+    assert response.status_code == 200
+
+    body = response.json()
+    data = body["data"]
+
+    assert data["application"] == "SupplyMind Override"
+    assert data["version"] == "8.8.8"
+    assert data["environment"] == "test"
+    assert data["build_number"] == "9001"
+    assert data["git_commit"] == "override123"
+    assert data["deployment_name"] == "override-deployment"
+    assert data["instance_id"] == "override-instance"
+    assert data["uptime_seconds"] == 123.45
+
+
+def test_system_service_override_fixture(
+    client: TestClient,
+    override_system_service: Callable[[SystemService], None],
+) -> None:
+    """The shared fixture should install and clean up an override."""
+
+    metadata = ApplicationMetadata(
+        application="Fixture Override",
+        version="7.7.7",
+        environment="test",
+        build_number=None,
+        git_commit=None,
+        build_timestamp=None,
+        deployment_name=None,
+        instance_id="fixture-instance",
+        python_version="3.12.12",
+        uptime_seconds=77.7,
+    )
+
+    service = SystemService(
+        metadata_provider=lambda: metadata,
+    )
+
+    override_system_service(service)
+
+    response = client.get("/api/v1/version")
+
+    assert response.status_code == 200
+    assert response.json()["data"] == {
+        "version": "7.7.7",
+    }
