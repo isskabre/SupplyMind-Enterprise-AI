@@ -29,6 +29,7 @@ class Settings(BaseSettings):
 
     debug: bool = True
     log_level: str = "INFO"
+    http_timeout_seconds: float = 10.0
 
     @field_validator("log_level")
     @classmethod
@@ -53,19 +54,37 @@ class Settings(BaseSettings):
 
         return normalized_value
 
+    @field_validator("http_timeout_seconds")
+    @classmethod
+    def validate_http_timeout_seconds(
+        cls,
+        value: float,
+    ) -> float:
+        """Validate the outbound HTTP timeout."""
+
+        if value <= 0:
+            raise ValueError(
+                "http_timeout_seconds must be greater than zero."
+            )
+
+        return value
+
     @property
     def is_development(self) -> bool:
         """Return True when running in development."""
+
         return self.environment == Environment.DEVELOPMENT
 
     @property
     def is_testing(self) -> bool:
         """Return True when running in testing."""
+
         return self.environment == Environment.TEST
 
     @property
     def is_production(self) -> bool:
         """Return True when running in production."""
+
         return self.environment == Environment.PRODUCTION
 
     model_config = SettingsConfigDict(
@@ -78,6 +97,7 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     """Return a cached Settings instance."""
+
     return Settings()
 
 

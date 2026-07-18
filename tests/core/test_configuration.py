@@ -115,3 +115,21 @@ def test_build_metadata_can_be_configured() -> None:
     assert test_settings.git_commit == "fd6e680"
     assert test_settings.build_timestamp == "2026-07-18T09:30:00Z"
     assert test_settings.deployment_name == "supplymind-development"
+
+
+def test_http_timeout_uses_default_value() -> None:
+    """HTTP timeout should have a safe platform default."""
+
+    settings = Settings()
+
+    assert settings.http_timeout_seconds == 10.0
+
+
+def test_http_timeout_rejects_non_positive_value() -> None:
+    """HTTP timeout must be greater than zero."""
+
+    with pytest.raises(
+        ValueError,
+        match="http_timeout_seconds must be greater than zero",
+    ):
+        Settings(http_timeout_seconds=0)

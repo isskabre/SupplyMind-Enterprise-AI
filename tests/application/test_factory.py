@@ -3,8 +3,10 @@ Tests for the SupplyMind application factory.
 """
 
 from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
 from supplymind.application.factory import create_application
+from supplymind.connectors.api import HttpxClient
 
 
 def test_create_application_returns_fastapi_instance() -> None:
@@ -40,3 +42,25 @@ def test_create_application_registers_expected_routes() -> None:
         "/api/v1/info",
         "/api/v1/version",
     }.issubset(paths)
+
+def test_application_lifespan_manages_http_client() -> None:
+    """Application lifespan should create and release the HTTP client."""
+
+    application = create_application()
+
+    assert getattr(
+        application.state,
+        "http_client",
+        None,
+    ) is None
+
+    with TestClient(application):
+        http_client = application.state.http_client
+
+        assert isinstance(http_client, HttpxClient)
+
+    assert getattr(
+        application.state,
+        "http_client",
+        None,
+    ) is None
