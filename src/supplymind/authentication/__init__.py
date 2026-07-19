@@ -14,8 +14,10 @@ from supplymind.authentication.base import (
     CredentialUnavailableException,
     TokenAcquisitionException,
 )
+
 from supplymind.authentication.providers import (
     ApiKeyAuthenticationProvider,
+    BearerTokenAuthenticationProvider,
 )
 
 __all__ = [
@@ -24,6 +26,7 @@ __all__ = [
     "AuthenticationException",
     "AuthenticationHeaders",
     "AuthenticationProviderProtocol",
+    "BearerTokenAuthenticationProvider",
     "CredentialUnavailableException",
     "TokenAcquisitionException",
 ]

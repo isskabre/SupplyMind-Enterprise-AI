@@ -17,6 +17,7 @@ from supplymind.authentication.base.models import AuthenticationHeaders
 from supplymind.authentication.base.protocols import (
     AuthenticationProviderProtocol,
 )
+from supplymind.authentication.constants import API_KEY_HEADER
 
 
 @dataclass(frozen=True, slots=True)
@@ -34,7 +35,7 @@ class ApiKeyAuthenticationProvider(AuthenticationProviderProtocol):
     """
 
     api_key: str = field(repr=False)
-    header_name: str = "X-API-Key"
+    header_name: str = API_KEY_HEADER
     prefix: str | None = None
 
     def __post_init__(self) -> None:

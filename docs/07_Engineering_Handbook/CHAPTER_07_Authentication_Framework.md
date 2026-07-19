@@ -125,3 +125,63 @@ AuthenticationProviderProtocol
 ```
 
 allowing connectors to authenticate without depending on specific implementations.
+
+---
+
+# Bearer Token Authentication Provider
+
+## Overview
+
+The Bearer Token Authentication Provider produces immutable HTTP Authorization headers using the standard Bearer authentication scheme.
+
+Example:
+
+```http
+Authorization: Bearer eyJhbGciOi...
+```
+
+The provider is intentionally independent from token acquisition.
+
+It accepts a validated bearer token and formats HTTP headers according to the HTTP Authorization standard.
+
+---
+
+## Design Principles
+
+- immutable
+- protocol-oriented
+- security-first
+- standard-compliant
+- easily extensible
+
+---
+
+## Authentication Constants
+
+The framework now provides shared constants for authentication providers.
+
+```python
+AUTHORIZATION_HEADER = "Authorization"
+
+API_KEY_HEADER = "X-API-Key"
+
+BEARER_PREFIX = "Bearer"
+```
+
+Centralizing these values removes duplicated literals and provides a consistent vocabulary across providers.
+
+---
+
+## Relationship to Future Providers
+
+The Bearer Token Provider serves as the foundation for future authentication implementations.
+
+Future providers will include:
+
+- OAuth2 Client Credentials
+- Microsoft Entra ID
+- Managed Identity
+- Token Cache
+- Authentication Factory
+
+These providers will focus on obtaining tokens while reusing the Bearer authentication model for HTTP requests.

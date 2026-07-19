@@ -10,6 +10,7 @@ from supplymind.authentication import (
     AuthenticationException,
     AuthenticationHeaders,
     AuthenticationProviderProtocol,
+    BearerTokenAuthenticationProvider,
     CredentialUnavailableException,
     TokenAcquisitionException,
 )
@@ -20,6 +21,7 @@ def test_public_exports() -> None:
     Verify that the authentication package exports its public API.
     """
     assert ApiKeyAuthenticationProvider
+    assert BearerTokenAuthenticationProvider
     assert AuthenticationConfigurationException
     assert AuthenticationException
     assert AuthenticationHeaders
