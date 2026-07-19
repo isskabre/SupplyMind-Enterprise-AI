@@ -1,255 +1,127 @@
-# Chapter 7 — Authentication Framework
-
 ---
 
-# Business Motivation
+# API Key Authentication Provider
 
-Every enterprise system requires authentication before allowing access to protected resources.
+The API Key Authentication Provider is the first concrete implementation of the SupplyMind authentication framework.
 
-Examples include:
+It converts an API key into immutable HTTP authentication headers while protecting credentials from accidental exposure.
 
-- Microsoft Graph
-- SharePoint
-- GitHub
-- Databricks
-- SAP
-- Azure OpenAI
-- OpenAI
+## Architecture
 
-Although each platform uses a different authentication mechanism, SupplyMind should expose a single, consistent interface to the rest of the application.
-
-The Authentication Framework isolates credential management from connector logic, allowing connectors to focus exclusively on communicating with external systems.
-
----
-
-# Architecture Overview
-
-```
-Business Service
-        │
-        ▼
-Connector
-        │
-        ▼
-Authentication Provider
-        │
-        ▼
-Authentication Headers
-        │
-        ▼
-Enterprise HTTP Client
-        │
-        ▼
-External API
-```
-
-Each layer has a single responsibility.
-
----
-
-# Responsibilities
-
-## Authentication Provider
-
-Responsible for:
-
-- Supplying authentication headers
-- Managing credential formats
-- Obtaining access tokens
-- Refreshing expired tokens
-- Hiding credential implementation details
-
-Authentication providers should never contain business logic.
-
----
-
-## Authentication Headers
-
-Authentication information is represented as an immutable value object.
-
-Benefits include:
-
-- Defensive copying
-- Immutable state
-- Safer logging
-- Easier testing
-- Clear ownership of authentication data
-
-Sensitive values are intentionally excluded from object representations to reduce the risk of credential leakage during debugging.
-
----
-
-# Dependency Inversion
-
-Connectors depend on:
-
-```
+```text
 AuthenticationProviderProtocol
-```
-
-instead of:
-
-```
-BearerAuthenticationProvider
-```
-
-or
-
-```
+              │
+              ▼
 ApiKeyAuthenticationProvider
-```
-
-This allows authentication strategies to be replaced without changing connector implementations.
-
----
-
-# Strategy Pattern
-
-Authentication is implemented using the Strategy Pattern.
-
-```
-AuthenticationProviderProtocol
-
-        ▲
-
- ┌──────┴────────┐
-
- │               │
-
- ▼               ▼
-
-API Key      Bearer Token
-
-Provider        Provider
-
-        ...
-
-Future Providers
-
-OAuth2
-
-Microsoft Entra ID
-
-Managed Identity
-
-Client Credentials
-```
-
-Each provider implements the same protocol.
-
----
-
-# Exception Hierarchy
-
-Authentication failures are isolated from connector failures.
-
-Examples include:
-
-- AuthenticationConfigurationException
-- CredentialUnavailableException
-- TokenAcquisitionException
-
-This separation allows callers to distinguish authentication problems from transport or connector errors.
-
----
-
-# Security Principles
-
-The Authentication Framework follows several security practices:
-
-- Immutable authentication objects
-- Secret-safe object representations
-- Protocol-based abstractions
-- No business logic in authentication providers
-- No credential handling inside connectors
-
-Future enhancements may include:
-
-- Secure secret stores
-- Token caching
-- Automatic token refresh
-- Managed identities
-- Key rotation
-
----
-
-# Current Authentication Flow
-
-```
-Connector
-
-        │
-
-        ▼
-
-AuthenticationProviderProtocol
-
-        │
-
-        ▼
-
+              │
+              ▼
 AuthenticationHeaders
-
-        │
-
-        ▼
-
-HTTP Client
+              │
+              ▼
+Enterprise HTTP Client
 ```
 
-The connector never constructs authentication headers directly.
+The provider implements the common authentication protocol, allowing connectors to remain independent of authentication details.
+
+---
+
+# Supported Authentication Styles
+
+The provider supports multiple enterprise authentication styles.
+
+## Example 1
+
+```http
+X-API-Key: abc123
+```
+
+---
+
+## Example 2
+
+```http
+api-key: abc123
+```
+
+---
+
+## Example 3
+
+```http
+Authorization: Bearer abc123
+```
+
+This flexibility allows a single provider implementation to authenticate against many enterprise APIs.
+
+---
+
+# Security Features
+
+The implementation follows several enterprise security practices.
+
+## Hidden Credentials
+
+API keys never appear in:
+
+- Object representations
+- Logging output
+- Debugging sessions
+- Exception messages
+
+---
+
+## Immutable Headers
+
+Authentication headers are immutable after creation.
+
+This prevents accidental modification before requests are sent.
+
+---
+
+## Configuration Validation
+
+The provider validates configuration before it can be used.
+
+Rejected configurations include:
+
+- Empty API keys
+- Empty header names
+- Empty authentication prefixes
+
+This follows the **Fail Fast** principle.
+
+---
+
+# Design Principles
+
+This implementation demonstrates:
+
+- Single Responsibility Principle (SRP)
+- Dependency Inversion Principle (DIP)
+- Protocol-Oriented Design
+- Immutable Value Objects
+- Defensive Copying
+- Fail Fast Validation
 
 ---
 
 # Future Authentication Providers
 
-The framework is designed to support multiple authentication strategies.
+The authentication framework is designed to support additional authentication mechanisms without modifying connector implementations.
 
-| Provider | Example Systems |
-|----------|-----------------|
-| API Key | OpenAI |
-| Bearer Token | GitHub |
-| OAuth2 | SAP |
-| Microsoft Entra ID | SharePoint |
-| Client Credentials | Microsoft Graph |
-| Managed Identity | Azure OpenAI |
+Planned providers include:
 
-Each provider can be introduced without modifying connector implementations.
+- Bearer Token Authentication
+- OAuth2 Client Credentials
+- Microsoft Entra ID
+- Azure Managed Identity
+- AWS IAM Authentication
+- Google Service Account Authentication
 
----
+Every authentication provider will implement:
 
-# Testing Strategy
+```python
+AuthenticationProviderProtocol
+```
 
-Authentication providers should be tested independently.
-
-Tests should verify:
-
-- Header generation
-- Secret protection
-- Defensive copying
-- Exception handling
-- Protocol compliance
-
-External identity providers should be exercised only in dedicated integration tests.
-
----
-
-# Common Mistakes
-
-Avoid:
-
-- Embedding authentication logic inside connectors
-- Returning mutable authentication data
-- Logging secrets
-- Mixing authentication and business logic
-- Depending directly on vendor SDKs
-
----
-
-# Key Takeaways
-
-The Authentication Framework separates identity management from communication.
-
-By depending on `AuthenticationProviderProtocol`, connectors remain independent of specific authentication mechanisms, allowing the platform to support new enterprise systems without architectural changes.
-
-This design follows the Strategy Pattern, Dependency Inversion Principle, and Single Responsibility Principle while providing a secure and extensible foundation for enterprise integrations.
+allowing connectors to authenticate without depending on specific implementations.

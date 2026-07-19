@@ -1,9 +1,9 @@
 """
 SupplyMind Enterprise AI
 
-Enterprise Authentication
+Authentication Framework
 
-Public authentication framework exports.
+Public authentication exports.
 """
 
 from supplymind.authentication.base import (
@@ -14,8 +14,12 @@ from supplymind.authentication.base import (
     CredentialUnavailableException,
     TokenAcquisitionException,
 )
+from supplymind.authentication.providers import (
+    ApiKeyAuthenticationProvider,
+)
 
 __all__ = [
+    "ApiKeyAuthenticationProvider",
     "AuthenticationConfigurationException",
     "AuthenticationException",
     "AuthenticationHeaders",
