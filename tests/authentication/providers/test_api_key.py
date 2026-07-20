@@ -6,11 +6,11 @@ API Key Authentication Provider Tests
 
 import pytest
 
-from supplymind.authentication.base.exceptions import (
-    AuthenticationConfigurationException,
-)
 from supplymind.authentication.base.protocols import (
     AuthenticationProviderProtocol,
+)
+from supplymind.authentication.configuration import (
+    ApiKeyAuthenticationConfiguration,
 )
 from supplymind.authentication.providers import (
     ApiKeyAuthenticationProvider,
@@ -22,8 +22,11 @@ async def test_get_headers_returns_default_api_key_header() -> None:
     """
     The provider should return the API key using the default header name.
     """
-    provider = ApiKeyAuthenticationProvider(
+    configuration = ApiKeyAuthenticationConfiguration(
         api_key="test-secret",
+    )
+    provider = ApiKeyAuthenticationProvider(
+        configuration=configuration,
     )
 
     headers = await provider.get_headers()
@@ -36,11 +39,14 @@ async def test_get_headers_returns_default_api_key_header() -> None:
 @pytest.mark.anyio
 async def test_get_headers_supports_custom_header_name() -> None:
     """
-    The provider should support APIs that require a custom header name.
+    The provider should use the configured custom header name.
     """
-    provider = ApiKeyAuthenticationProvider(
+    configuration = ApiKeyAuthenticationConfiguration(
         api_key="test-secret",
         header_name="api-key",
+    )
+    provider = ApiKeyAuthenticationProvider(
+        configuration=configuration,
     )
 
     headers = await provider.get_headers()
@@ -53,12 +59,15 @@ async def test_get_headers_supports_custom_header_name() -> None:
 @pytest.mark.anyio
 async def test_get_headers_supports_prefix() -> None:
     """
-    The provider should prepend a configured prefix to the API key.
+    The provider should prepend the configured prefix to the API key.
     """
-    provider = ApiKeyAuthenticationProvider(
+    configuration = ApiKeyAuthenticationConfiguration(
         api_key="test-secret",
         header_name="Authorization",
         prefix="Bearer",
+    )
+    provider = ApiKeyAuthenticationProvider(
+        configuration=configuration,
     )
 
     headers = await provider.get_headers()
@@ -69,14 +78,17 @@ async def test_get_headers_supports_prefix() -> None:
 
 
 @pytest.mark.anyio
-async def test_provider_normalizes_surrounding_whitespace() -> None:
+async def test_provider_uses_normalized_configuration() -> None:
     """
-    Provider configuration should be normalized during construction.
+    The provider should use values normalized by its configuration.
     """
-    provider = ApiKeyAuthenticationProvider(
+    configuration = ApiKeyAuthenticationConfiguration(
         api_key="  test-secret  ",
         header_name="  X-Internal-Key  ",
         prefix="  Token  ",
+    )
+    provider = ApiKeyAuthenticationProvider(
+        configuration=configuration,
     )
 
     headers = await provider.get_headers()
@@ -90,8 +102,11 @@ def test_provider_implements_authentication_protocol() -> None:
     """
     The concrete provider should satisfy the authentication protocol.
     """
-    provider = ApiKeyAuthenticationProvider(
+    configuration = ApiKeyAuthenticationConfiguration(
         api_key="test-secret",
+    )
+    provider = ApiKeyAuthenticationProvider(
+        configuration=configuration,
     )
 
     assert isinstance(
@@ -100,89 +115,32 @@ def test_provider_implements_authentication_protocol() -> None:
     )
 
 
-@pytest.mark.parametrize(
-    "api_key",
-    [
-        "",
-        " ",
-        "   ",
-        "\t",
-        "\n",
-    ],
-)
-def test_provider_rejects_empty_api_key(api_key: str) -> None:
+def test_provider_preserves_configuration_instance() -> None:
     """
-    Empty or whitespace-only API keys should be rejected.
+    The provider should retain the supplied immutable configuration.
     """
-    with pytest.raises(
-        AuthenticationConfigurationException,
-        match="non-empty API key",
-    ):
-        ApiKeyAuthenticationProvider(
-            api_key=api_key,
-        )
+    configuration = ApiKeyAuthenticationConfiguration(
+        api_key="test-secret",
+    )
+    provider = ApiKeyAuthenticationProvider(
+        configuration=configuration,
+    )
 
-
-@pytest.mark.parametrize(
-    "header_name",
-    [
-        "",
-        " ",
-        "   ",
-        "\t",
-        "\n",
-    ],
-)
-def test_provider_rejects_empty_header_name(
-    header_name: str,
-) -> None:
-    """
-    Empty or whitespace-only header names should be rejected.
-    """
-    with pytest.raises(
-        AuthenticationConfigurationException,
-        match="non-empty header name",
-    ):
-        ApiKeyAuthenticationProvider(
-            api_key="test-secret",
-            header_name=header_name,
-        )
-
-
-@pytest.mark.parametrize(
-    "prefix",
-    [
-        "",
-        " ",
-        "   ",
-        "\t",
-        "\n",
-    ],
-)
-def test_provider_rejects_empty_prefix(prefix: str) -> None:
-    """
-    A supplied prefix must contain a meaningful value.
-    """
-    with pytest.raises(
-        AuthenticationConfigurationException,
-        match="prefix must be non-empty",
-    ):
-        ApiKeyAuthenticationProvider(
-            api_key="test-secret",
-            prefix=prefix,
-        )
+    assert provider.configuration is configuration
 
 
 def test_provider_representation_does_not_expose_api_key() -> None:
     """
-    The API key must not appear in repr output.
+    The API key must not appear in the provider representation.
     """
     api_key = "highly-sensitive-api-key"
-
-    provider = ApiKeyAuthenticationProvider(
+    configuration = ApiKeyAuthenticationConfiguration(
         api_key=api_key,
         header_name="Authorization",
         prefix="Bearer",
+    )
+    provider = ApiKeyAuthenticationProvider(
+        configuration=configuration,
     )
 
     provider_representation = repr(provider)
@@ -190,19 +148,3 @@ def test_provider_representation_does_not_expose_api_key() -> None:
     assert api_key not in provider_representation
     assert "Authorization" in provider_representation
     assert "Bearer" in provider_representation
-
-
-def test_configuration_exception_does_not_expose_api_key() -> None:
-    """
-    Invalid-configuration errors must not include credential values.
-    """
-    api_key = "   "
-
-    with pytest.raises(
-        AuthenticationConfigurationException,
-    ) as exception_info:
-        ApiKeyAuthenticationProvider(
-            api_key=api_key,
-        )
-
-    assert api_key not in str(exception_info.value)

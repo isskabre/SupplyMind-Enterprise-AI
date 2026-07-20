@@ -52,8 +52,8 @@ def test_create_api_key_forwards_configuration() -> None:
         provider,
         ApiKeyAuthenticationProvider,
     )
-    assert provider.header_name == "X-Internal-Key"
-    assert provider.prefix == "Token"
+    assert provider.configuration.header_name == "X-Internal-Key"
+    assert provider.configuration.prefix == "Token"
 
 
 def test_create_api_key_uses_default_header() -> None:
@@ -68,7 +68,7 @@ def test_create_api_key_uses_default_header() -> None:
         provider,
         ApiKeyAuthenticationProvider,
     )
-    assert provider.header_name == API_KEY_HEADER
+    assert provider.configuration.header_name == API_KEY_HEADER
 
 
 def test_create_bearer_returns_bearer_provider() -> None:

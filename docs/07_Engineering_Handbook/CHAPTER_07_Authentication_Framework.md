@@ -23,21 +23,27 @@ Future implementations will extend the framework with OAuth2, Microsoft Entra ID
 
 ```text
                     Enterprise Connector
-                            │
-                            ▼
-              AuthenticationProviderProtocol
-                            ▲
-              ┌─────────────┴─────────────┐
-              │                           │
-              ▼                           ▼
+                             │
+                             ▼
+                 AuthenticationFactory
+                             │
+                             ▼
+            Authentication Configuration
+                             │
+                             ▼
+            AuthenticationProviderProtocol
+                             ▲
+               ┌─────────────┴─────────────┐
+               │                           │
+               ▼                           ▼
 ApiKeyAuthenticationProvider   BearerTokenAuthenticationProvider
-              │                           │
-              └─────────────┬─────────────┘
-                            ▼
-                 AuthenticationHeaders
-                            │
-                            ▼
-                 Enterprise HTTP Client
+               │                           │
+               └─────────────┬─────────────┘
+                             ▼
+                  AuthenticationHeaders
+                             │
+                             ▼
+                  Enterprise HTTP Client
 ```
 
 The connector depends only on the `AuthenticationProviderProtocol`.
@@ -339,6 +345,21 @@ A future implementation will introduce strongly typed authentication configurati
 ```python
 AuthenticationFactory.create(configuration)
 ```
+Beginning with Implementation 20, the factory creates immutable
+authentication configuration objects before constructing providers.
+
+```text
+Factory
+    │
+    ▼
+Configuration
+    │
+    ▼
+Provider
+```
+
+This separates configuration from runtime behavior while keeping
+provider implementations focused on producing HTTP headers.
 
 ---
 
@@ -451,12 +472,86 @@ Planned improvements include:
 
 - Authentication Configuration Models
 - Generic configuration-driven provider creation
+- Authentication Strategy Resolution
+- OAuth2 Token Lifecycle Management
 - OAuth2 Client Credentials Provider creation
 - Microsoft Entra ID Provider creation
 - Azure Managed Identity Provider creation
 - Dependency injection integration
 
 The factory will remain the centralized construction boundary while provider implementations continue to own authentication behavior.
+
+---
+
+# Authentication Configuration Models
+
+## Overview
+
+Implementation 20 introduced immutable configuration models that separate authentication configuration from authentication behavior.
+
+Instead of storing raw credentials directly inside authentication providers, providers now receive validated configuration objects.
+
+This follows a common enterprise architecture pattern used throughout modern SDKs and cloud platforms.
+
+---
+
+## Architecture
+
+```text
+AuthenticationFactory
+        │
+        ▼
+AuthenticationConfiguration
+        │
+        ▼
+AuthenticationProvider
+        │
+        ▼
+AuthenticationHeaders
+        │
+        ▼
+Enterprise HTTP Client
+```
+
+---
+
+## Current Configuration Models
+
+The framework currently provides:
+
+- ApiKeyAuthenticationConfiguration
+- BearerTokenAuthenticationConfiguration
+
+Each model is responsible for:
+
+- validating configuration
+- normalizing whitespace
+- storing immutable settings
+
+Authentication providers no longer perform configuration validation.
+
+Instead, they focus exclusively on producing authentication headers.
+
+---
+
+## Benefits
+
+Separating configuration from providers provides several enterprise advantages:
+
+- Single Responsibility
+- Reusable configuration
+- Simpler providers
+- Easier testing
+- Dependency Injection friendly
+- Immutable validated objects
+
+Configuration models now act as the single source of truth for authentication settings.
+
+Multiple providers can safely share the same immutable configuration instance without risking accidental mutation or inconsistent validation.
+
+This pattern is commonly used throughout enterprise SDKs and cloud frameworks because it simplifies dependency injection, improves testability, and reduces duplicated validation logic.
+
+This architecture prepares the framework for OAuth2, Microsoft Entra ID, Azure Managed Identity, and future authentication mechanisms.
 
 ---
 
@@ -468,6 +563,7 @@ The factory will remain the centralized construction boundary while provider imp
 - Authentication models
 - Authentication exception hierarchy
 - Authentication constants
+- Authentication configuration models
 - API Key Authentication Provider
 - Bearer Token Authentication Provider
 - Authentication Factory
@@ -475,7 +571,6 @@ The factory will remain the centralized construction boundary while provider imp
 
 ## Planned
 
-- Authentication Configuration Models
 - OAuth2 Client Credentials Provider
 - Access Token Model
 - OAuth2 Token Cache

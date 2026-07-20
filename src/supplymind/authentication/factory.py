@@ -11,6 +11,10 @@ from __future__ import annotations
 from supplymind.authentication.base.protocols import (
     AuthenticationProviderProtocol,
 )
+from supplymind.authentication.configuration import (
+    ApiKeyAuthenticationConfiguration,
+    BearerTokenAuthenticationConfiguration,
+)
 from supplymind.authentication.constants import API_KEY_HEADER
 from supplymind.authentication.providers import (
     ApiKeyAuthenticationProvider,
@@ -22,8 +26,8 @@ class AuthenticationFactory:
     """
     Create authentication providers through a centralized construction API.
 
-    The factory hides concrete provider construction from callers while
-    returning the common AuthenticationProviderProtocol abstraction.
+    The factory creates validated configuration objects, injects them into
+    concrete providers, and returns the shared authentication abstraction.
     """
 
     @staticmethod
@@ -43,10 +47,14 @@ class AuthenticationFactory:
         Returns:
             An authentication provider implementing the shared protocol.
         """
-        return ApiKeyAuthenticationProvider(
+        configuration = ApiKeyAuthenticationConfiguration(
             api_key=api_key,
             header_name=header_name,
             prefix=prefix,
+        )
+
+        return ApiKeyAuthenticationProvider(
+            configuration=configuration,
         )
 
     @staticmethod
@@ -54,7 +62,7 @@ class AuthenticationFactory:
         token: str,
     ) -> AuthenticationProviderProtocol:
         """
-        Create a bearer token authentication provider.
+        Create a bearer-token authentication provider.
 
         Args:
             token: Secret bearer token.
@@ -62,6 +70,10 @@ class AuthenticationFactory:
         Returns:
             An authentication provider implementing the shared protocol.
         """
-        return BearerTokenAuthenticationProvider(
+        configuration = BearerTokenAuthenticationConfiguration(
             token=token,
+        )
+
+        return BearerTokenAuthenticationProvider(
+            configuration=configuration,
         )
