@@ -8,6 +8,7 @@ from supplymind.authentication import (
     ApiKeyAuthenticationProvider,
     AuthenticationConfigurationException,
     AuthenticationException,
+    AuthenticationFactory,
     AuthenticationHeaders,
     AuthenticationProviderProtocol,
     BearerTokenAuthenticationProvider,
@@ -28,3 +29,4 @@ def test_public_exports() -> None:
     assert AuthenticationProviderProtocol
     assert CredentialUnavailableException
     assert TokenAcquisitionException
+    assert AuthenticationFactory
