@@ -14,6 +14,8 @@ from supplymind.authentication import (
     BearerTokenAuthenticationProvider,
     CredentialUnavailableException,
     TokenAcquisitionException,
+    OAuth2AccessToken,
+    OAuth2ClientCredentialsAuthenticationProvider,
 )
 
 
@@ -30,3 +32,5 @@ def test_public_exports() -> None:
     assert CredentialUnavailableException
     assert TokenAcquisitionException
     assert AuthenticationFactory
+    assert OAuth2AccessToken
+    assert OAuth2ClientCredentialsAuthenticationProvider

@@ -53,13 +53,8 @@ def test_base_authentication_exception_uses_generic_code() -> None:
         message="Unexpected authentication failure.",
     )
 
-    assert (
-        exception.code
-        == ErrorCode.AUTHENTICATION_PROVIDER_ERROR
-    )
-    assert exception.message == (
-        "Unexpected authentication failure."
-    )
+    assert exception.code == ErrorCode.AUTHENTICATION_PROVIDER_ERROR
+    assert exception.message == ("Unexpected authentication failure.")
     assert exception.details is None
 
 

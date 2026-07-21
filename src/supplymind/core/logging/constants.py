@@ -22,9 +22,5 @@ DEFAULT_LOG_LEVEL = "INFO"
 DEFAULT_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 DEFAULT_LOG_FORMAT = (
-    "%(asctime)s | "
-    "%(levelname)-8s | "
-    "[%(correlation_id)s] | "
-    "%(name)s | "
-    "%(message)s"
+    "%(asctime)s | %(levelname)-8s | [%(correlation_id)s] | %(name)s | %(message)s"
 )

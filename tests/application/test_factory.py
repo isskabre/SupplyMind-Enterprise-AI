@@ -43,24 +43,31 @@ def test_create_application_registers_expected_routes() -> None:
         "/api/v1/version",
     }.issubset(paths)
 
+
 def test_application_lifespan_manages_http_client() -> None:
     """Application lifespan should create and release the HTTP client."""
 
     application = create_application()
 
-    assert getattr(
-        application.state,
-        "http_client",
-        None,
-    ) is None
+    assert (
+        getattr(
+            application.state,
+            "http_client",
+            None,
+        )
+        is None
+    )
 
     with TestClient(application):
         http_client = application.state.http_client
 
         assert isinstance(http_client, HttpxClient)
 
-    assert getattr(
-        application.state,
-        "http_client",
-        None,
-    ) is None
+    assert (
+        getattr(
+            application.state,
+            "http_client",
+            None,
+        )
+        is None
+    )

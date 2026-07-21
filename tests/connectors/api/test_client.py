@@ -253,3 +253,51 @@ def test_client_rejects_non_positive_timeout() -> None:
         match="timeout_seconds must be greater than zero",
     ):
         HttpxClient(timeout_seconds=0)
+
+
+@pytest.mark.anyio
+async def test_request_forwards_form_data() -> None:
+    """
+    The client should forward form-compatible request data to HTTPX.
+    """
+
+    async def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "POST"
+        assert request.url == "https://example.com/oauth/token"
+        assert request.headers["content-type"].startswith(
+            "application/x-www-form-urlencoded"
+        )
+        assert request.content == (
+            b"grant_type=client_credentials"
+            b"&client_id=test-client"
+            b"&client_secret=test-secret"
+        )
+
+        return httpx.Response(
+            status_code=200,
+            json={
+                "access_token": "access-token",
+                "token_type": "Bearer",
+                "expires_in": 3600,
+            },
+        )
+
+    async_client = httpx.AsyncClient(
+        transport=httpx.MockTransport(handler),
+    )
+    client = HttpxClient(client=async_client)
+
+    try:
+        response = await client.request(
+            method="POST",
+            url="https://example.com/oauth/token",
+            data={
+                "grant_type": "client_credentials",
+                "client_id": "test-client",
+                "client_secret": "test-secret",
+            },
+        )
+    finally:
+        await client.close()
+
+    assert response.status_code == 200

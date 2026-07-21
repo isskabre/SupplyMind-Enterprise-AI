@@ -23,7 +23,4 @@ def test_connector_health_with_message() -> None:
     )
 
     assert health.healthy is False
-    assert (
-        health.message
-        == "Authentication failed."
-    )
+    assert health.message == "Authentication failed."

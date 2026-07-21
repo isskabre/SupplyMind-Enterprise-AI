@@ -19,13 +19,11 @@ def client() -> Generator[TestClient, None, None]:
 
 
 @pytest.fixture
-def override_system_service() -> (
-    Generator[
-        Callable[[SystemService], None],
-        None,
-        None,
-    ]
-):
+def override_system_service() -> Generator[
+    Callable[[SystemService], None],
+    None,
+    None,
+]:
     """
     Provide a helper for overriding the SystemService dependency.
     """

@@ -3,6 +3,7 @@ SupplyMind Enterprise AI
 
 Authentication Protocol Tests
 """
+
 import pytest
 
 from supplymind.authentication.base.models import AuthenticationHeaders

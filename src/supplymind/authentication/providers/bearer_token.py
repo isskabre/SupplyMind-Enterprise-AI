@@ -40,9 +40,5 @@ class BearerTokenAuthenticationProvider(
         configuration = self.configuration
 
         return AuthenticationHeaders(
-            {
-                AUTHORIZATION_HEADER: (
-                    f"{BEARER_PREFIX} {configuration.token}"
-                )
-            }
+            {AUTHORIZATION_HEADER: (f"{BEARER_PREFIX} {configuration.token}")}
         )

@@ -42,10 +42,8 @@ def test_incoming_correlation_id_is_preserved() -> None:
     )
 
     assert response.status_code == 200
-    assert (
-        response.headers["X-Correlation-ID"]
-        == expected_correlation_id
-    )
+    assert response.headers["X-Correlation-ID"] == expected_correlation_id
+
 
 def test_invalid_correlation_id_is_replaced(client) -> None:
     response = client.get(

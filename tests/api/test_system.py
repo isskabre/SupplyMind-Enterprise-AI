@@ -166,9 +166,7 @@ def test_system_service_dependency_can_be_overridden(
             metadata_provider=lambda: metadata,
         )
 
-    app.dependency_overrides[get_system_service] = (
-        override_system_service
-    )
+    app.dependency_overrides[get_system_service] = override_system_service
 
     try:
         response = client.get("/api/v1/info")

@@ -30,9 +30,7 @@ class AuthenticationException(SupplyMindException):
         )
 
 
-class AuthenticationConfigurationException(
-    AuthenticationException
-):
+class AuthenticationConfigurationException(AuthenticationException):
     """
     Raised when an authentication provider is configured incorrectly.
     """

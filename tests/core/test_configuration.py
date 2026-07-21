@@ -65,9 +65,7 @@ def test_production_debug_mode_is_rejected() -> None:
     exception = exception_info.value
 
     assert exception.code == ErrorCode.CONFIGURATION_ERROR
-    assert exception.message == (
-        "Application configuration validation failed."
-    )
+    assert exception.message == ("Application configuration validation failed.")
     assert exception.details == {
         "errors": [
             "debug must be disabled when running in production.",
@@ -86,6 +84,7 @@ def test_valid_production_configuration_passes() -> None:
     validate_configuration(settings)
 
     assert settings.is_production is True
+
 
 def test_build_metadata_defaults_to_none() -> None:
     """Optional build metadata should not be invented locally."""

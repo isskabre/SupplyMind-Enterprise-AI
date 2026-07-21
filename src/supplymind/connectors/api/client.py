@@ -58,6 +58,7 @@ class HttpxClient:
         *,
         params: Mapping[str, Any] | None = None,
         headers: Mapping[str, str] | None = None,
+        data: Mapping[str, Any] | None = None,
         json: Any | None = None,
     ) -> HttpResponse:
         """
@@ -68,6 +69,7 @@ class HttpxClient:
             url: Absolute or client-relative request URL.
             params: Optional query-string parameters.
             headers: Optional request headers.
+            data: Optional form-compatible request body.
             json: Optional JSON-compatible request body.
 
         Returns:
@@ -91,6 +93,7 @@ class HttpxClient:
                 url=url,
                 params=params,
                 headers=headers,
+                data=data,
                 json=json,
             )
         except httpx.TimeoutException as exc:

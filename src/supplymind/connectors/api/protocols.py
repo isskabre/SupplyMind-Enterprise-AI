@@ -29,6 +29,7 @@ class HttpClientProtocol(Protocol):
         *,
         params: Mapping[str, Any] | None = None,
         headers: Mapping[str, str] | None = None,
+        data: Mapping[str, Any] | None = None,
         json: Any | None = None,
     ) -> HttpResponse:
         """
@@ -39,6 +40,7 @@ class HttpClientProtocol(Protocol):
             url: Absolute or client-relative request URL.
             params: Optional query-string parameters.
             headers: Optional request headers.
+            data: Optional form-compatible request body.
             json: Optional JSON-compatible request body.
 
         Returns:

@@ -31,9 +31,7 @@ def validate_configuration(settings: Settings) -> None:
         errors.append("app_version must not be empty.")
 
     if settings.is_production and settings.debug:
-        errors.append(
-            "debug must be disabled when running in production."
-        )
+        errors.append("debug must be disabled when running in production.")
 
     if errors:
         raise ConfigurationException(

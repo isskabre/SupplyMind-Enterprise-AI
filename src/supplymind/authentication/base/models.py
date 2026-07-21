@@ -31,8 +31,7 @@ class AuthenticationHeaders:
         Create a defensive, immutable copy of the supplied headers.
         """
         normalized_headers = {
-            str(name): str(value)
-            for name, value in self._values.items()
+            str(name): str(value) for name, value in self._values.items()
         }
 
         object.__setattr__(

@@ -5,6 +5,7 @@ Tests for system service diagnostics.
 from supplymind.services.system_service import SystemService
 from supplymind.core.metadata import ApplicationMetadata
 
+
 def create_test_metadata() -> ApplicationMetadata:
     """Return deterministic metadata for service tests."""
 
@@ -20,6 +21,7 @@ def create_test_metadata() -> ApplicationMetadata:
         python_version="3.12.12",
         uptime_seconds=42.5,
     )
+
 
 def test_liveness_reports_application_alive() -> None:
     service = SystemService()
@@ -54,6 +56,7 @@ def test_system_info_contains_operational_metadata() -> None:
     assert system_info["uptime_seconds"] >= 0
     assert isinstance(system_info["python_version"], str)
     assert system_info["python_version"]
+
 
 def test_service_uses_injected_metadata_provider() -> None:
     """System service should use its injected metadata provider."""

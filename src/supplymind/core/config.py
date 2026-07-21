@@ -48,9 +48,7 @@ class Settings(BaseSettings):
 
         if normalized_value not in allowed_levels:
             allowed_values = ", ".join(sorted(allowed_levels))
-            raise ValueError(
-                f"log_level must be one of: {allowed_values}"
-            )
+            raise ValueError(f"log_level must be one of: {allowed_values}")
 
         return normalized_value
 
@@ -63,9 +61,7 @@ class Settings(BaseSettings):
         """Validate the outbound HTTP timeout."""
 
         if value <= 0:
-            raise ValueError(
-                "http_timeout_seconds must be greater than zero."
-            )
+            raise ValueError("http_timeout_seconds must be greater than zero.")
 
         return value
 

@@ -54,13 +54,10 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         try:
             response = await call_next(request)
         except Exception:
-            duration_ms = (
-                time.perf_counter() - start_time
-            ) * 1000
+            duration_ms = (time.perf_counter() - start_time) * 1000
 
             logger.exception(
-                "HTTP request failed | Method=%s | Path=%s | "
-                "Duration=%.2f ms",
+                "HTTP request failed | Method=%s | Path=%s | Duration=%.2f ms",
                 request.method,
                 request.url.path,
                 duration_ms,
@@ -74,9 +71,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 
             raise
 
-        duration_ms = (
-            time.perf_counter() - start_time
-        ) * 1000
+        duration_ms = (time.perf_counter() - start_time) * 1000
 
         logger.log(
             _get_log_level(response.status_code),

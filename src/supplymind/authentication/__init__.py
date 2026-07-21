@@ -17,8 +17,10 @@ from supplymind.authentication.base import (
 from supplymind.authentication.providers import (
     ApiKeyAuthenticationProvider,
     BearerTokenAuthenticationProvider,
+    OAuth2ClientCredentialsAuthenticationProvider,
 )
 from supplymind.authentication.factory import AuthenticationFactory
+from supplymind.authentication.models import OAuth2AccessToken
 
 __all__ = [
     "ApiKeyAuthenticationProvider",
@@ -30,4 +32,6 @@ __all__ = [
     "BearerTokenAuthenticationProvider",
     "CredentialUnavailableException",
     "TokenAcquisitionException",
+    "OAuth2AccessToken",
+    "OAuth2ClientCredentialsAuthenticationProvider",
 ]

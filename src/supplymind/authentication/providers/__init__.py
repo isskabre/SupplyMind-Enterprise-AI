@@ -12,8 +12,12 @@ from supplymind.authentication.providers.api_key import (
 from supplymind.authentication.providers.bearer_token import (
     BearerTokenAuthenticationProvider,
 )
+from supplymind.authentication.providers.oauth2_client_credentials import (
+    OAuth2ClientCredentialsAuthenticationProvider,
+)
 
 __all__ = [
     "ApiKeyAuthenticationProvider",
     "BearerTokenAuthenticationProvider",
+    "OAuth2ClientCredentialsAuthenticationProvider",
 ]

@@ -7,6 +7,7 @@ Authentication Configuration Export Tests
 from supplymind.authentication.configuration import (
     ApiKeyAuthenticationConfiguration,
     BearerTokenAuthenticationConfiguration,
+    OAuth2ClientCredentialsConfiguration,
 )
 
 
@@ -16,3 +17,4 @@ def test_public_exports() -> None:
     """
     assert ApiKeyAuthenticationConfiguration
     assert BearerTokenAuthenticationConfiguration
+    assert OAuth2ClientCredentialsConfiguration
