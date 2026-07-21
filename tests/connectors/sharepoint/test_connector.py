@@ -14,9 +14,10 @@ from supplymind.connectors.sharepoint.models import (
     SharePointSite,
 )
 from supplymind.connectors.sharepoint.exceptions import (
+    SharePointAuthenticationException,
     SharePointSiteNotFoundException,
+    SharePointAuthorizationException,
 )
-
 
 def test_sharepoint_connector_initialization() -> None:
     http_client = Mock(spec=HttpClientProtocol)
@@ -152,6 +153,124 @@ async def test_get_site_raises_when_site_is_not_found() -> None:
             "/sites/"
             "contoso.sharepoint.com:"
             "/sites/MissingSite"
+        ),
+        headers={
+            "Authorization": "Bearer test-token",
+        },
+    )
+
+@pytest.mark.anyio
+async def test_get_site_raises_when_authentication_fails() -> None:
+    authentication_provider = Mock(
+        spec=AuthenticationProviderProtocol,
+    )
+    authentication_provider.get_headers = AsyncMock(
+        return_value=AuthenticationHeaders(
+            {
+                "Authorization": "Bearer test-token",
+            }
+        )
+    )
+
+    http_client = Mock(spec=HttpClientProtocol)
+    http_client.get = AsyncMock(
+        return_value=HttpResponse(
+            status_code=401,
+            headers={
+                "content-type": "application/json",
+            },
+            content={
+                "error": {
+                    "code": "InvalidAuthenticationToken",
+                    "message": "Access token is invalid.",
+                }
+            },
+        )
+    )
+
+    configuration = SharePointConnectorConfiguration(
+        site_hostname="contoso.sharepoint.com",
+        site_path="/sites/QualityAnalytics",
+    )
+
+    connector = SharePointConnector(
+        http_client=http_client,
+        authentication_provider=authentication_provider,
+        configuration=configuration,
+    )
+
+    with pytest.raises(SharePointAuthenticationException):
+        await connector.get_site()
+
+    authentication_provider.get_headers.assert_awaited_once_with()
+
+    http_client.get.assert_awaited_once_with(
+        url=(
+            "https://graph.microsoft.com/v1.0"
+            "/sites/"
+            "contoso.sharepoint.com:"
+            "/sites/QualityAnalytics"
+        ),
+        headers={
+            "Authorization": "Bearer test-token",
+        },
+    )
+
+@pytest.mark.anyio
+async def test_get_site_raises_when_authorization_fails() -> None:
+    authentication_provider = Mock(
+        spec=AuthenticationProviderProtocol,
+    )
+    authentication_provider.get_headers = AsyncMock(
+        return_value=AuthenticationHeaders(
+            {
+                "Authorization": "Bearer test-token",
+            }
+        )
+    )
+
+    http_client = Mock(spec=HttpClientProtocol)
+    http_client.get = AsyncMock(
+        return_value=HttpResponse(
+            status_code=403,
+            headers={
+                "content-type": "application/json",
+            },
+            content={
+                "error": {
+                    "code": "accessDenied",
+                    "message": (
+                        "Access denied."
+                    ),
+                }
+            },
+        )
+    )
+
+    configuration = SharePointConnectorConfiguration(
+        site_hostname="contoso.sharepoint.com",
+        site_path="/sites/QualityAnalytics",
+    )
+
+    connector = SharePointConnector(
+        http_client=http_client,
+        authentication_provider=authentication_provider,
+        configuration=configuration,
+    )
+
+    with pytest.raises(
+        SharePointAuthorizationException
+    ):
+        await connector.get_site()
+
+    authentication_provider.get_headers.assert_awaited_once_with()
+
+    http_client.get.assert_awaited_once_with(
+        url=(
+            "https://graph.microsoft.com/v1.0"
+            "/sites/"
+            "contoso.sharepoint.com:"
+            "/sites/QualityAnalytics"
         ),
         headers={
             "Authorization": "Bearer test-token",

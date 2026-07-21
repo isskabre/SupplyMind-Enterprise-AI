@@ -4,6 +4,8 @@ from supplymind.authentication.base.protocols import (
 from supplymind.connectors.api.models import HttpResponse
 from supplymind.connectors.api.protocols import HttpClientProtocol
 from supplymind.connectors.sharepoint.exceptions import (
+    SharePointAuthenticationException,
+    SharePointAuthorizationException,
     SharePointSiteNotFoundException,
 )
 from supplymind.connectors.sharepoint.models import (
@@ -68,11 +70,23 @@ class SharePointConnector:
                 Response returned by Microsoft Graph.
 
         Raises:
+            SharePointAuthenticationException:
+                If Microsoft Graph rejects the authentication credentials.
+
             SharePointSiteNotFoundException:
                 If the configured SharePoint site does not exist.
         """
+        if response.status_code == 401:
+            raise SharePointAuthenticationException(
+                "SharePoint authentication failed."
+            )
 
         if response.status_code == 404:
             raise SharePointSiteNotFoundException(
                 "The configured SharePoint site was not found."
+            )
+
+        if response.status_code == 403:
+            raise SharePointAuthorizationException(
+                "Access to the SharePoint site was denied."
             )
