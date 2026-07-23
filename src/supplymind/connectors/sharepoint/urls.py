@@ -61,3 +61,27 @@ class SharePointUrls:
             URL for retrieving the drive's root items.
         """
         return f"{configuration.base_url}/drives/{drive_id}/root/children"
+
+    @staticmethod
+    def download_file(
+        configuration: SharePointConnectorConfiguration,
+        drive_id: str,
+        item_id: str,
+    ) -> str:
+        """
+        Build the Microsoft Graph endpoint for downloading a drive item.
+
+        Args:
+            configuration:
+                SharePoint connector configuration.
+
+            drive_id:
+                Microsoft Graph identifier of the drive.
+
+            item_id:
+                Microsoft Graph identifier of the drive item.
+
+        Returns:
+            URL for downloading the drive item's binary content.
+        """
+        return f"{configuration.base_url}/drives/{drive_id}/items/{item_id}/content"

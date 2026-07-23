@@ -130,6 +130,37 @@ class SharePointConnector:
 
         return [SharePointDriveItem.model_validate(item) for item in raw_items]
 
+    async def download_file(
+        self,
+        item_id: str,
+    ) -> bytes:
+        """
+        Download the binary content of a SharePoint drive item.
+
+        Args:
+            item_id:
+                Microsoft Graph identifier of the drive item.
+
+        Returns:
+            Raw file content as bytes.
+        """
+        drive = await self.get_default_drive()
+
+        authentication_headers = await self._authentication_provider.get_headers()
+
+        response = await self._http_client.get(
+            url=SharePointUrls.download_file(
+                self._configuration,
+                drive_id=drive.id,
+                item_id=item_id,
+            ),
+            headers=authentication_headers.as_dict(),
+        )
+
+        self._raise_for_error(response)
+
+        return response.content
+
     def _raise_for_error(
         self,
         response: HttpResponse,

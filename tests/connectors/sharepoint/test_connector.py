@@ -459,3 +459,78 @@ async def test_get_drive_items_returns_sharepoint_drive_items() -> None:
     ]
 
     assert http_client.get.await_count == 3
+
+
+@pytest.mark.anyio
+async def test_download_file_returns_bytes() -> None:
+    authentication_provider = Mock(
+        spec=AuthenticationProviderProtocol,
+    )
+    authentication_provider.get_headers = AsyncMock(
+        return_value=AuthenticationHeaders(
+            {
+                "Authorization": "Bearer test-token",
+            }
+        )
+    )
+
+    http_client = Mock(spec=HttpClientProtocol)
+    http_client.get = AsyncMock(
+        side_effect=[
+            HttpResponse(
+                status_code=200,
+                headers={
+                    "content-type": "application/json",
+                },
+                content={
+                    "id": "site-id",
+                    "name": "Quality Analytics",
+                    "webUrl": ("https://contoso.sharepoint.com/sites/QualityAnalytics"),
+                },
+            ),
+            HttpResponse(
+                status_code=200,
+                headers={
+                    "content-type": "application/json",
+                },
+                content={
+                    "id": "drive-id",
+                    "name": "Documents",
+                    "driveType": "documentLibrary",
+                    "webUrl": (
+                        "https://contoso.sharepoint.com/"
+                        "sites/QualityAnalytics/Documents"
+                    ),
+                },
+            ),
+            HttpResponse(
+                status_code=200,
+                headers={
+                    "content-type": (
+                        "application/vnd.openxmlformats-officedocument."
+                        "spreadsheetml.sheet"
+                    ),
+                },
+                content=b"fake-excel-content",
+            ),
+        ]
+    )
+
+    configuration = SharePointConnectorConfiguration(
+        site_hostname="contoso.sharepoint.com",
+        site_path="/sites/QualityAnalytics",
+    )
+
+    connector = SharePointConnector(
+        http_client=http_client,
+        authentication_provider=authentication_provider,
+        configuration=configuration,
+    )
+
+    content = await connector.download_file(
+        item_id="item-id",
+    )
+
+    assert content == b"fake-excel-content"
+
+    assert http_client.get.await_count == 3
