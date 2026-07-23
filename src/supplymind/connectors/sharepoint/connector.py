@@ -10,6 +10,7 @@ from supplymind.connectors.sharepoint.exceptions import (
 )
 from supplymind.connectors.sharepoint.models import (
     SharePointConnectorConfiguration,
+    SharePointDrive,
     SharePointSite,
 )
 from supplymind.connectors.sharepoint.urls import SharePointUrls
@@ -42,6 +43,13 @@ class SharePointConnector:
             The resolved SharePoint site.
 
         Raises:
+            SharePointAuthenticationException:
+                If Microsoft Graph rejects the authentication credentials.
+
+            SharePointAuthorizationException:
+                If the authenticated identity lacks permission to access
+                the SharePoint site.
+
             SharePointSiteNotFoundException:
                 If Microsoft Graph cannot find the configured site.
         """
@@ -55,6 +63,42 @@ class SharePointConnector:
         self._raise_for_error(response)
 
         return SharePointSite.model_validate(
+            response.content,
+        )
+
+    async def get_default_drive(self) -> SharePointDrive:
+        """
+        Retrieve the default SharePoint document library.
+
+        Returns:
+            The default SharePoint drive.
+
+        Raises:
+            SharePointAuthenticationException:
+                If Microsoft Graph rejects the authentication credentials.
+
+            SharePointAuthorizationException:
+                If the authenticated identity lacks permission to access
+                the SharePoint drive.
+
+            SharePointSiteNotFoundException:
+                If the configured SharePoint site cannot be found.
+        """
+        site = await self.get_site()
+
+        authentication_headers = await self._authentication_provider.get_headers()
+
+        response = await self._http_client.get(
+            url=SharePointUrls.drive(
+                self._configuration,
+                site.id,
+            ),
+            headers=authentication_headers.as_dict(),
+        )
+
+        self._raise_for_error(response)
+
+        return SharePointDrive.model_validate(
             response.content,
         )
 
@@ -73,20 +117,22 @@ class SharePointConnector:
             SharePointAuthenticationException:
                 If Microsoft Graph rejects the authentication credentials.
 
+            SharePointAuthorizationException:
+                If the authenticated identity lacks permission to access
+                the SharePoint resource.
+
             SharePointSiteNotFoundException:
                 If the configured SharePoint site does not exist.
         """
         if response.status_code == 401:
-            raise SharePointAuthenticationException(
-                "SharePoint authentication failed."
+            raise SharePointAuthenticationException("SharePoint authentication failed.")
+
+        if response.status_code == 403:
+            raise SharePointAuthorizationException(
+                "Access to the SharePoint resource was denied."
             )
 
         if response.status_code == 404:
             raise SharePointSiteNotFoundException(
                 "The configured SharePoint site was not found."
-            )
-
-        if response.status_code == 403:
-            raise SharePointAuthorizationException(
-                "Access to the SharePoint site was denied."
             )

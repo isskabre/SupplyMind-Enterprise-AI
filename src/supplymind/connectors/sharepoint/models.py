@@ -72,3 +72,26 @@ class SharePointSite(BaseModel):
     web_url: str = Field(
         alias="webUrl",
     )
+
+
+class SharePointDrive(BaseModel):
+    """
+    Represents a SharePoint document library exposed as a Microsoft Graph drive.
+    """
+
+    model_config = ConfigDict(
+        frozen=True,
+        extra="ignore",
+        populate_by_name=True,
+    )
+
+    id: str
+    name: str
+
+    drive_type: str = Field(
+        alias="driveType",
+    )
+
+    web_url: str = Field(
+        alias="webUrl",
+    )

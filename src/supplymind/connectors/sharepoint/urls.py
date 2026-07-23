@@ -30,3 +30,13 @@ class SharePointUrls:
             f"{configuration.site_hostname}:"
             f"{configuration.site_path}"
         )
+
+    @staticmethod
+    def drive(
+        configuration: SharePointConnectorConfiguration,
+        site_id: str,
+    ) -> str:
+        """
+        Build the Microsoft Graph endpoint for a site's default drive.
+        """
+        return f"{configuration.base_url}/sites/{site_id}/drive"

@@ -7,6 +7,7 @@ from pydantic import ValidationError
 
 from supplymind.connectors.sharepoint.models import (
     SharePointConnectorConfiguration,
+    SharePointDrive,
     SharePointSite,
 )
 
@@ -96,3 +97,26 @@ def test_sharepoint_site_ignores_extra_graph_fields() -> None:
     assert site.id == "site-id"
     assert site.name == "Quality Analytics"
     assert site.web_url == "https://contoso.sharepoint.com/sites/QualityAnalytics"
+
+
+def test_sharepoint_drive_parses_graph_response() -> None:
+    """
+    The model should convert a Microsoft Graph drive response
+    into a typed SharePoint drive object.
+    """
+    graph_response = {
+        "id": "drive-id",
+        "name": "Documents",
+        "driveType": "documentLibrary",
+        "webUrl": ("https://contoso.sharepoint.com/sites/QualityAnalytics/Documents"),
+    }
+
+    drive = SharePointDrive.model_validate(graph_response)
+
+    assert drive.id == "drive-id"
+    assert drive.name == "Documents"
+    assert drive.drive_type == "documentLibrary"
+    assert (
+        drive.web_url
+        == "https://contoso.sharepoint.com/sites/QualityAnalytics/Documents"
+    )
