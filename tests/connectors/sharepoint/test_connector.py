@@ -11,8 +11,9 @@ from supplymind.connectors.api.protocols import HttpClientProtocol
 from supplymind.connectors.sharepoint.connector import SharePointConnector
 from supplymind.connectors.sharepoint.models import (
     SharePointConnectorConfiguration,
-    SharePointSite,
     SharePointDrive,
+    SharePointDriveItem,
+    SharePointSite,
 )
 from supplymind.connectors.sharepoint.exceptions import (
     SharePointAuthenticationException,
@@ -344,3 +345,117 @@ async def test_get_default_drive_returns_sharepoint_drive() -> None:
         drive_type="documentLibrary",
         web_url=("https://contoso.sharepoint.com/sites/QualityAnalytics/Documents"),
     )
+
+
+@pytest.mark.anyio
+async def test_get_drive_items_returns_sharepoint_drive_items() -> None:
+    authentication_provider = Mock(
+        spec=AuthenticationProviderProtocol,
+    )
+    authentication_provider.get_headers = AsyncMock(
+        return_value=AuthenticationHeaders(
+            {
+                "Authorization": "Bearer test-token",
+            }
+        )
+    )
+
+    http_client = Mock(spec=HttpClientProtocol)
+    http_client.get = AsyncMock(
+        side_effect=[
+            HttpResponse(
+                status_code=200,
+                headers={
+                    "content-type": "application/json",
+                },
+                content={
+                    "id": "site-id",
+                    "name": "Quality Analytics",
+                    "webUrl": ("https://contoso.sharepoint.com/sites/QualityAnalytics"),
+                },
+            ),
+            HttpResponse(
+                status_code=200,
+                headers={
+                    "content-type": "application/json",
+                },
+                content={
+                    "id": "drive-id",
+                    "name": "Documents",
+                    "driveType": "documentLibrary",
+                    "webUrl": (
+                        "https://contoso.sharepoint.com/"
+                        "sites/QualityAnalytics/Documents"
+                    ),
+                },
+            ),
+            HttpResponse(
+                status_code=200,
+                headers={
+                    "content-type": "application/json",
+                },
+                content={
+                    "value": [
+                        {
+                            "id": "folder-id",
+                            "name": "Reports",
+                            "webUrl": (
+                                "https://contoso.sharepoint.com/"
+                                "sites/QualityAnalytics/"
+                                "Shared Documents/Reports"
+                            ),
+                            "is_folder": True,
+                        },
+                        {
+                            "id": "file-id",
+                            "name": "employees.xlsx",
+                            "webUrl": (
+                                "https://contoso.sharepoint.com/"
+                                "sites/QualityAnalytics/"
+                                "Shared Documents/employees.xlsx"
+                            ),
+                            "is_folder": False,
+                        },
+                    ]
+                },
+            ),
+        ]
+    )
+
+    configuration = SharePointConnectorConfiguration(
+        site_hostname="contoso.sharepoint.com",
+        site_path="/sites/QualityAnalytics",
+    )
+
+    connector = SharePointConnector(
+        http_client=http_client,
+        authentication_provider=authentication_provider,
+        configuration=configuration,
+    )
+
+    items = await connector.get_drive_items()
+
+    assert items == [
+        SharePointDriveItem(
+            id="folder-id",
+            name="Reports",
+            web_url=(
+                "https://contoso.sharepoint.com/"
+                "sites/QualityAnalytics/"
+                "Shared Documents/Reports"
+            ),
+            is_folder=True,
+        ),
+        SharePointDriveItem(
+            id="file-id",
+            name="employees.xlsx",
+            web_url=(
+                "https://contoso.sharepoint.com/"
+                "sites/QualityAnalytics/"
+                "Shared Documents/employees.xlsx"
+            ),
+            is_folder=False,
+        ),
+    ]
+
+    assert http_client.get.await_count == 3

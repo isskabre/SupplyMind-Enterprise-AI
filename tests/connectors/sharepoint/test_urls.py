@@ -33,3 +33,19 @@ def test_build_default_drive_url() -> None:
         )
         == "https://graph.microsoft.com/v1.0/sites/site-id/drive"
     )
+
+
+def test_build_drive_items_url() -> None:
+    """
+    The URL builder should create the Microsoft Graph endpoint
+    for retrieving the root drive items.
+    """
+    configuration = SharePointConnectorConfiguration(
+        site_hostname="contoso.sharepoint.com",
+        site_path="/sites/QualityAnalytics",
+    )
+
+    assert SharePointUrls.drive_items(
+        configuration,
+        "drive-id",
+    ) == ("https://graph.microsoft.com/v1.0/drives/drive-id/root/children")

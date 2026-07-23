@@ -95,3 +95,25 @@ class SharePointDrive(BaseModel):
     web_url: str = Field(
         alias="webUrl",
     )
+
+
+class SharePointDriveItem(BaseModel):
+    """
+    Represents a file or folder stored in a SharePoint document library.
+    """
+
+    model_config = ConfigDict(
+        frozen=True,
+        extra="ignore",
+        populate_by_name=True,
+    )
+
+    id: str
+
+    name: str
+
+    web_url: str = Field(
+        alias="webUrl",
+    )
+
+    is_folder: bool

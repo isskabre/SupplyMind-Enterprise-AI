@@ -11,6 +11,7 @@ from supplymind.connectors.sharepoint.exceptions import (
 from supplymind.connectors.sharepoint.models import (
     SharePointConnectorConfiguration,
     SharePointDrive,
+    SharePointDriveItem,
     SharePointSite,
 )
 from supplymind.connectors.sharepoint.urls import SharePointUrls
@@ -101,6 +102,33 @@ class SharePointConnector:
         return SharePointDrive.model_validate(
             response.content,
         )
+
+    async def get_drive_items(
+        self,
+    ) -> list[SharePointDriveItem]:
+        """
+        Retrieve the root files and folders from the default SharePoint drive.
+
+        Returns:
+            The SharePoint drive items found in the drive root.
+        """
+        drive = await self.get_default_drive()
+
+        authentication_headers = await self._authentication_provider.get_headers()
+
+        response = await self._http_client.get(
+            url=SharePointUrls.drive_items(
+                self._configuration,
+                drive.id,
+            ),
+            headers=authentication_headers.as_dict(),
+        )
+
+        self._raise_for_error(response)
+
+        raw_items = response.content["value"]
+
+        return [SharePointDriveItem.model_validate(item) for item in raw_items]
 
     def _raise_for_error(
         self,

@@ -8,6 +8,7 @@ from pydantic import ValidationError
 from supplymind.connectors.sharepoint.models import (
     SharePointConnectorConfiguration,
     SharePointDrive,
+    SharePointDriveItem,
     SharePointSite,
 )
 
@@ -120,3 +121,62 @@ def test_sharepoint_drive_parses_graph_response() -> None:
         drive.web_url
         == "https://contoso.sharepoint.com/sites/QualityAnalytics/Documents"
     )
+
+
+def test_sharepoint_drive_item_parses_graph_response() -> None:
+    """
+    The model should convert a Microsoft Graph drive item response
+    into a typed SharePoint drive item object.
+    """
+    graph_response = {
+        "id": "item-id",
+        "name": "employees.xlsx",
+        "webUrl": (
+            "https://contoso.sharepoint.com/"
+            "sites/QualityAnalytics/"
+            "Shared Documents/employees.xlsx"
+        ),
+        "is_folder": False,
+    }
+
+    item = SharePointDriveItem.model_validate(
+        graph_response,
+    )
+
+    assert item.id == "item-id"
+    assert item.name == "employees.xlsx"
+    assert item.web_url == (
+        "https://contoso.sharepoint.com/"
+        "sites/QualityAnalytics/"
+        "Shared Documents/employees.xlsx"
+    )
+    assert item.is_folder is False
+
+
+def test_sharepoint_drive_item_ignores_extra_graph_fields() -> None:
+    """
+    The model should ignore Microsoft Graph fields that are not yet
+    used by the connector.
+    """
+    graph_response = {
+        "id": "item-id",
+        "name": "employees.xlsx",
+        "webUrl": (
+            "https://contoso.sharepoint.com/"
+            "sites/QualityAnalytics/"
+            "Shared Documents/employees.xlsx"
+        ),
+        "is_folder": False,
+        "size": 12345,
+        "createdDateTime": "2026-07-24T12:00:00Z",
+        "lastModifiedDateTime": "2026-07-24T12:10:00Z",
+        "unusedField": "ignored",
+    }
+
+    item = SharePointDriveItem.model_validate(
+        graph_response,
+    )
+
+    assert item.id == "item-id"
+    assert item.name == "employees.xlsx"
+    assert item.is_folder is False
